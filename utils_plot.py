@@ -75,22 +75,22 @@ def plot_param_dist(path_results, dirName, prms, learn_prms):
             ax = sns.distplot(tau, kde=False)
             plt.xlabel('ms')
             if pname == 'alpha':
-                title = "Layer {:d} tau_syn distribution ({:d}AB_{:d}HET)".format(layer, prms['train_ab'], prms['het_ab'])
+                title = "Layer {} tau_syn distribution ({}AB_{}HET)".format(layer, prms['train_ab'], prms['het_ab'])
                 ax.set_title(title)
             elif pname == 'beta':
-                title = "Layer {:d} tau_mem distribution ({:d}AB_{:d}HET)".format(layer, prms['train_ab'],
+                title = "Layer {} tau_mem distribution ({}AB_{}HET)".format(layer, prms['train_ab'],
                                                                                   prms['het_ab'])
                 ax.set_title(title)
         elif pname == 'th':
             ax = sns.distplot(lparam.flatten(), kde=False)
             plt.xlabel('ms')
-            title = "Layer {:d} Threshold distribution ({:d}TH_{:d}THET)".format(layer, prms['train_th'], prms['het_th'])
+            title = "Layer {} Threshold distribution ({}TH_{}THET)".format(layer, prms['train_th'], prms['het_th'])
             ax.set_title(title)
         # Weights distribution
         else:
             ax = sns.distplot(lparam.flatten(), kde=False)
             plt.xlabel('weight')
-            title = "Layer {:d} weights distribution ({:d}AB_{:d}HET)".format(layer, prms['train_ab'], prms['het_ab'])
+            title = "Layer {} weights distribution ({}AB_{}HET)".format(layer, prms['train_ab'], prms['het_ab'])
             ax.set_title(title)
         plt.savefig(os.path.join(path_results, dirName, title+'.png'))
         plt.close()
@@ -126,7 +126,7 @@ def plot_raster(path_results, dirName, prms, layer_recs_v, mode='train', batch=0
                 plt.imshow(s[batch, :, :].detach().cpu().t(), cmap=plt.cm.gist_gray, aspect="auto")
             plt.xlabel("Time (ms)")
             plt.ylabel("Neuron")
-            title = "Epoch {:d} Layer {:d} spikes ({:d}AB_{:d}HET)".format(epoch, l, prms['train_ab'], prms['het_ab'])
+            title = "Epoch {} Layer {} spikes ({}AB_{}HET)".format(epoch, l, prms['train_ab'], prms['het_ab'])
             plt.title(title)
             sns.despine()
             if not os.path.exists(os.path.join(path_results, dirName, subdirName)):

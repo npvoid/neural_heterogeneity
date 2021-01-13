@@ -2,3 +2,6 @@ __pycache__/
 .idea/
 .git/
 .git.bfg-report/
+*/results/
+.gitignore
+*/dataset/
