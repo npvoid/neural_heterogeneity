@@ -4,7 +4,7 @@ import seaborn as sns
 import pickle as pckl
 import os
 from collections import defaultdict
-
+import argparse
 
 class Experiment:
     def __init__(self, nb_trials, nb_epochs, alpha=0.3, timescale=None):
@@ -273,20 +273,19 @@ class Experiment:
 
 
 if __name__ == "__main__":
-    # path_results = './NMNIST/results/0reg0noise_lr1e-4'
-    # path_results = './SHD/results/shd_lr1e-4'
-    path_results = './DVS/results/dvs_1ms'
-    # path_results = './FMNIST/results/0reg0noise'
-    path_results = './SSC/results/ssc_b2048'
+    parser = argparse.ArgumentParser(description='PyTorch Spiking Neural Network')
+    parser.add_argument('--nb_seeds', type=int, default=10, help='Seed')
+    parser.add_argument('--nb_epochs', type=int, default=75, help='Epochs')
+    parser.add_argument('--alpha', type=float, default=0.3, help='Alpha')
+    parser.add_argument('--path_results', type=str, help='Results path')
+    parser.add_argument('--timescale', type=float, default=1, help='Selecting time scale if you trained with multiple using sparse_data_generator_scale')
 
-    nb_seeds = 10  # Number of trials
-    nb_epochs = 75
-    alpha = 0.3
-    ss_epoch = nb_epochs-1
-    timescale = 1
+    prms = vars(parser.parse_args())
 
-    exp = Experiment(nb_seeds, nb_epochs, alpha=alpha, timescale=timescale)
-    exp.run_results(path_results)
+    ss_epoch = prms['nb_epochs']-1
+
+    exp = Experiment(prms['nb_seeds'], prms['nb_epochs'], alpha=prms['alpha'], timescale=prms['timescale'])
+    exp.run_results(prms['path_results'])
     exp.plot_results(ss_epoch)
 
     plt.show()

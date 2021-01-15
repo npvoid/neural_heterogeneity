@@ -73,8 +73,6 @@ parser.add_argument("--plot_step", type=int, default=50, help="Sets saving step 
 
 prms = vars(parser.parse_args())
 
-# prms['w_scale'] = prms['w_scale'] * (1.0 - prms['beta'])
-# prms['v_scale'] = prms['v_scale'] * (1.0 - prms['beta'])
 # PyTorch
 prms['dtype'] = torch.float
 prms['device'] = torch.device("cuda") if prms['cuda'] else torch.device("cpu")

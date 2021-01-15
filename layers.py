@@ -26,9 +26,7 @@ class SpikingLayer(nn.Module):
         self.th = nn.Parameter(torch.empty((1, output_size), device=self.device, dtype=self.dtype), requires_grad=bool(prms['train_th']))
 
         # Init variables
-        # nn.init.normal_(self.w, mean=0.0, std=prms['w_scale'] / input_size)
         fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.w)
-        # bound = (1 - prms['beta']) / math.sqrt(fan_in)
         bound = 1 / math.sqrt(fan_in)
         nn.init.uniform_(self.w, -bound, bound)
 
@@ -103,9 +101,7 @@ class MembraneLayer(nn.Module):
         # Variables in each layer
         self.w = nn.Parameter(torch.empty((input_size, output_size), device=self.device, dtype=self.dtype, requires_grad=True))
 
-        # nn.init.normal_(self.w, mean=0.0, std=prms['w_scale'] / input_size)
         fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.w)
-        # bound = (1 - prms['beta']) / math.sqrt(fan_in)
         bound = 1 / math.sqrt(fan_in)
         nn.init.uniform_(self.w, -bound, bound)
 
@@ -169,9 +165,7 @@ class SynapticLayer(nn.Module):
 
         # Variables in each layer
         self.w = nn.Parameter(torch.empty((input_size, output_size), device=self.device, dtype=self.dtype, requires_grad=True))
-        # nn.init.normal_(self.w, mean=0.0, std=prms['w_scale'] / input_size)
         fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.w)
-        # bound = (1 - prms['beta']) / math.sqrt(fan_in)
         bound = 1 / math.sqrt(fan_in)
         nn.init.uniform_(self.w, -bound, bound)
 
@@ -217,9 +211,7 @@ class PerceptronLayer(nn.Module):
 
         # Variables in each layer
         self.w = nn.Parameter(torch.empty((input_size, output_size), device=self.device, dtype=self.dtype, requires_grad=True))
-        # nn.init.normal_(self.w, mean=0.0, std=prms['w_scale'] / input_size)
         fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.w)
-        # bound = (1 - prms['beta']) / math.sqrt(fan_in)
         bound = 1 / math.sqrt(fan_in)
         nn.init.uniform_(self.w, -bound, bound)
 
@@ -246,18 +238,11 @@ class RecurrentSpikingLayer(nn.Module):
         self.v = nn.Parameter(
             torch.empty((output_size, output_size), device=self.device, dtype=self.dtype, requires_grad=True))
 
-        # Init variables
-        # nn.init.normal_(self.w, mean=0.0, std=prms['w_scale'] / input_size)
-        # v = np.random.normal(loc=0.0, scale=prms['v_scale'] / input_size, size=(output_size, output_size))
-        # np.fill_diagonal(v, 0)
-        # self.v.data.copy_(torch.from_numpy(v))
-
         fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.w)
-        # bound = (1 - prms['beta']) / math.sqrt(fan_in)
         bound = 1 / math.sqrt(fan_in)
         nn.init.uniform_(self.w, -bound, bound)
+
         fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.v)
-        # bound = (1 - prms['beta']) / math.sqrt(fan_in)
         bound = 1 / math.sqrt(fan_in)
         nn.init.uniform_(self.v, -bound, bound)
 

@@ -6,9 +6,10 @@ import pickle as pckl
 from collections import defaultdict
 import numpy as np
 import importlib
+import argparse
 
 class Experiment_dist:
-    def __init__(self, nb_trials, nb_layers=2):
+    def __init__(self, nb_trials, nb_layers):
 
         self.het_ab = ['hom', 'het']
         self.train_ab = ['no_ab', 'hom_ab', 'het_ab']
@@ -41,39 +42,38 @@ class Experiment_dist:
 
 
 
-    def read_data(self, path_results, dirs):
-        for d in dirs:
-            for dirpath, _, files in os.walk(os.path.join(path_results, d)):
-                for f in files:
-                    if f.endswith(".pickle"):
-                        pickle_in = open(os.path.join(dirpath, 'parameters.pickle'), "rb")
-                        parameters = pckl.load(pickle_in)
-                        prms = parameters['prms']
-                        learn_prms = parameters['learn_prms']
-                        self.time_step =prms['time_step']
+    def read_data(self, path_results):
+        for dirpath, _, files in os.walk(path_results):
+            for f in files:
+                if f.endswith(".pickle"):
+                    pickle_in = open(os.path.join(dirpath, 'parameters.pickle'), "rb")
+                    parameters = pckl.load(pickle_in)
+                    prms = parameters['prms']
+                    learn_prms = parameters['learn_prms']
+                    self.time_step =prms['time_step']
 
-                        if 'Heterogeneous' in prms.keys():
-                            prms['het_ab'] = prms['Heterogeneous']
-                        i = prms['seed']
-                        if i > self.nb_trials - 1:
-                            break
+                    if 'Heterogeneous' in prms.keys():
+                        prms['het_ab'] = prms['Heterogeneous']
+                    i = prms['seed']
+                    if i > self.nb_trials - 1:
+                        break
 
-                        for lparam_name, lparam in learn_prms:
-                            layer = int(lparam_name.replace('.', ' ').split()[1])  # Layer number
-                            pname = lparam_name.replace('.', ' ').split()[2]  # Learned Parameter name
+                    for lparam_name, lparam in learn_prms:
+                        layer = int(lparam_name.replace('.', ' ').split()[1])  # Layer number
+                        pname = lparam_name.replace('.', ' ').split()[2]  # Learned Parameter name
 
-                            if pname in self.pname and layer in range(self.nb_layers):
-                                if prms['train_ab'] == 0 and prms['het_ab'] == 0:
-                                    if 'train_hom_ab' in prms.keys() and prms['train_hom_ab'] == 1:
-                                        self.dist['hom']['hom_ab'][pname][layer].extend(lparam.flatten())
-                                    else:
-                                        self.dist['hom']['no_ab'][pname][layer].extend(lparam.flatten())
-                                elif prms['train_ab'] == 0 and prms['het_ab'] == 1:
-                                    self.dist['het']['no_ab'][pname][layer].extend(lparam.flatten())
-                                elif prms['train_ab'] == 1 and prms['het_ab'] == 0:
-                                    self.dist['hom']['het_ab'][pname][layer].extend(lparam.flatten())
-                                elif prms['train_ab'] == 1 and prms['het_ab'] == 1:
-                                    self.dist['het']['het_ab'][pname][layer].extend(lparam.flatten())
+                        if pname in self.pname and layer in range(self.nb_layers):
+                            if prms['train_ab'] == 0 and prms['het_ab'] == 0:
+                                if 'train_hom_ab' in prms.keys() and prms['train_hom_ab'] == 1:
+                                    self.dist['hom']['hom_ab'][pname][layer].extend(lparam.flatten())
+                                else:
+                                    self.dist['hom']['no_ab'][pname][layer].extend(lparam.flatten())
+                            elif prms['train_ab'] == 0 and prms['het_ab'] == 1:
+                                self.dist['het']['no_ab'][pname][layer].extend(lparam.flatten())
+                            elif prms['train_ab'] == 1 and prms['het_ab'] == 0:
+                                self.dist['hom']['het_ab'][pname][layer].extend(lparam.flatten())
+                            elif prms['train_ab'] == 1 and prms['het_ab'] == 1:
+                                self.dist['het']['het_ab'][pname][layer].extend(lparam.flatten())
 
 
     def plot_param_dist(self):
@@ -94,24 +94,20 @@ class Experiment_dist:
 
                             ax.set_title(title)
 
-    def run_dist(self, path_results, dirs):
-        self.read_data(path_results, dirs)
+    def run_dist(self, path_results):
+        self.read_data(path_results)
         self.plot_param_dist()
 
 
 if __name__ == "__main__":
-    path_results = './NMNIST/results/nmnist_100ms'
-    # path_results = './SHD/results/shd_train_hom'
-    # path_results = './DVS/results/0reg0noise'
-    dirs = ['00th_000ab_00rest_00reset0', '00th_010ab_00rest_00reset', '00th_100ab_00rest_00reset', '00th_110ab_00rest_00reset']
-    # dirs = ['0ab0het', '0ab1het', '1ab0het', '1ab1het']
-    # dirs = ['0th0hth0ab0hab', '0th1hth0ab0hab', '1th0hth0ab0hab', '1th1hth0ab0hab']
-    # dirs = ['0th0hth0ab0hab', '0th0hth0ab1hab', '0th0hth1ab0hab', '0th0hth1ab1hab']
-    # dirs = ['0ab0hab0thom', '0ab0hab1thom']
-    nb_seeds = 10  # Number of trials
+    parser = argparse.ArgumentParser(description='PyTorch Spiking Neural Network')
+    parser.add_argument('--nb_seeds', type=int, default=10, help='Seed')
+    parser.add_argument('--nb_layers', type=int, default=1, help='Number of layers to be plotted')
+    parser.add_argument('--path_results', type=str, help='Results path')
 
-    exp = Experiment_dist(nb_seeds, 1)
-    exp.run_dist(path_results, dirs)
-    # exp.plot_results(ss_epoch)
+    prms = vars(parser.parse_args())
+
+    exp = Experiment_dist(prms['nb_seeds'], prms['nb_layers'])
+    exp.run_dist(prms['path_results'])
 
     plt.show()
