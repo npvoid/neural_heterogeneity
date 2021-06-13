@@ -8,6 +8,14 @@ from SuSpike import SuSpike
 spike_fn = SuSpike.apply
 
 
+def dist_fn(dist):
+    return {
+        'gamma': lambda mean, k, size: np.random.gamma(k, scale=mean/k, size=size),
+        'normal': lambda mean, sd, size: np.random.normal(loc=mean, scale=sd, size=size),
+        'uniform': lambda _, maximum, size: np.random.uniform(low=0, high=maximum, size=size),
+    }[dist.lower()]
+
+
 class SpikingLayer(nn.Module):
     # Implements LIF synaptic filtering + membrane filtering
     def __init__(self, input_size, output_size, prms):
@@ -15,7 +23,7 @@ class SpikingLayer(nn.Module):
         self.device = prms['device']
         self.dtype = prms['dtype']
         self.tref = prms['tref']
-        self.gamma_shape = prms['gamma_shape']
+        self.dist_prms = prms['dist_prms']
         set_seed(prms['seed'])
 
         # Create variables
@@ -31,10 +39,11 @@ class SpikingLayer(nn.Module):
         nn.init.uniform_(self.w, -bound, bound)
 
         if prms['het_ab']:
-            gamma_alpha = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_syn']/self.gamma_shape, size=(1, output_size)))
-            gamma_beta = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_mem']/self.gamma_shape, size=(1, output_size)))
-            self.alpha.data.copy_(torch.from_numpy(gamma_alpha))
-            self.beta.data.copy_(torch.from_numpy(gamma_beta))
+            distribution = dist_fn(prms['dist'])
+            dist_alpha = np.exp(-prms['time_step'] / distribution(prms['tau_syn'], self.dist_prms, (1, output_size)))
+            dist_beta = np.exp(-prms['time_step'] / distribution(prms['tau_mem'], self.dist_prms, (1, output_size)))
+            self.alpha.data.copy_(torch.from_numpy(dist_alpha))
+            self.beta.data.copy_(torch.from_numpy(dist_beta))
         else:
             nn.init.constant_(self.alpha, prms['alpha'])
             nn.init.constant_(self.beta, prms['beta'])
@@ -95,7 +104,7 @@ class MembraneLayer(nn.Module):
         super(MembraneLayer, self).__init__()
         self.device = prms['device']
         self.dtype = prms['dtype']
-        self.gamma_shape = prms['gamma_shape']
+        self.dist_prms = prms['dist_prms']
         set_seed(prms['seed'])
 
         # Variables in each layer
@@ -111,10 +120,11 @@ class MembraneLayer(nn.Module):
         self.beta = nn.Parameter(torch.empty((1, output_size), device=self.device, dtype=self.dtype), requires_grad=False)
 
         if prms['het_ab']:
-            gamma_alpha = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_syn']/self.gamma_shape, size=(1, output_size)))
-            gamma_beta = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_mem']/self.gamma_shape, size=(1, output_size)))
-            self.alpha.data.copy_(torch.from_numpy(gamma_alpha))
-            self.beta.data.copy_(torch.from_numpy(gamma_beta))
+            distribution = dist_fn(prms['dist'])
+            dist_alpha = np.exp(-prms['time_step'] / distribution(prms['tau_syn'], self.dist_prms, (1, output_size)))
+            dist_beta = np.exp(-prms['time_step'] / distribution(prms['tau_mem'], self.dist_prms, (1, output_size)))
+            self.alpha.data.copy_(torch.from_numpy(dist_alpha))
+            self.beta.data.copy_(torch.from_numpy(dist_beta))
         else:
             if not prms['train_ab']:
                 self.alpha = nn.Parameter(torch.empty((1), device=self.device, dtype=self.dtype), requires_grad=False)
@@ -160,7 +170,7 @@ class SynapticLayer(nn.Module):
         super(SynapticLayer, self).__init__()
         self.device = prms['device']
         self.dtype = prms['dtype']
-        self.gamma_shape = prms['gamma_shape']
+        self.dist_prms = prms['dist_prms']
         set_seed(prms['seed'])
 
         # Variables in each layer
@@ -172,8 +182,9 @@ class SynapticLayer(nn.Module):
         self.alpha = nn.Parameter(torch.empty((1, output_size), device=self.device, dtype=self.dtype), requires_grad=bool(prms['train_ab']))
 
         if prms['het_ab']:
-            gamma_alpha = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_syn']/self.gamma_shape, size=(1, output_size)))
-            self.alpha.data.copy_(torch.from_numpy(gamma_alpha))
+            distribution = dist_fn(prms['dist'])
+            dist_alpha = np.exp(-prms['time_step'] / distribution(prms['tau_syn'], self.dist_prms, (1, output_size)))
+            self.alpha.data.copy_(torch.from_numpy(dist_alpha))
         else:
             nn.init.constant_(self.alpha, prms['alpha'])
 
@@ -229,7 +240,7 @@ class RecurrentSpikingLayer(nn.Module):
         super(RecurrentSpikingLayer, self).__init__()
         self.device = prms['device']
         self.dtype = prms['dtype']
-        self.gamma_shape = prms['gamma_shape']
+        self.dist_prms = prms['dist_prms']
         set_seed(prms['seed'])
 
         # Create variables
@@ -249,10 +260,11 @@ class RecurrentSpikingLayer(nn.Module):
         self.alpha = nn.Parameter(torch.empty((1, output_size), device=self.device, dtype=self.dtype), requires_grad=bool(prms['train_ab']))
         self.beta = nn.Parameter(torch.empty((1, output_size), device=self.device, dtype=self.dtype), requires_grad=bool(prms['train_ab']))
         if prms['het_ab']:
-            gamma_alpha = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_syn']/self.gamma_shape, size=(1, output_size)))
-            gamma_beta = np.exp(-prms['time_step'] / np.random.gamma(self.gamma_shape, scale=prms['tau_mem']/self.gamma_shape, size=(1, output_size)))
-            self.alpha.data.copy_(torch.from_numpy(gamma_alpha))
-            self.beta.data.copy_(torch.from_numpy(gamma_beta))
+            distribution = dist_fn(prms['dist'])
+            dist_alpha = np.exp(-prms['time_step'] / distribution(prms['tau_syn'], self.dist_prms, (1, output_size)))
+            dist_beta = np.exp(-prms['time_step'] / distribution(prms['tau_mem'], self.dist_prms, (1, output_size)))
+            self.alpha.data.copy_(torch.from_numpy(dist_alpha))
+            self.beta.data.copy_(torch.from_numpy(dist_beta))
         else:
             if not prms['train_ab']:
                 self.alpha = nn.Parameter(torch.empty((1), device=self.device, dtype=self.dtype), requires_grad=bool(prms['train_hom_ab']))

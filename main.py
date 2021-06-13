@@ -52,7 +52,8 @@ parser.add_argument('--tau_syn', type=float, default=10e-3, help='time constant 
 parser.add_argument('--tau_mem', type=float, default=20e-3, help='time constant for membrane potential')  # 20e-3
 parser.add_argument('--threshold', type=float, default=1., help='spiking threshold')  # 1.
 parser.add_argument('--tref', type=float, default=0., help='refractory time')  # 0
-parser.add_argument('--gamma_shape', type=float, default=3, help='shape of Gamma distribution')
+parser.add_argument('--dist', type=str, default="gamma", help='Choose the model to train')
+parser.add_argument('--dist_prms', type=float, default=3, help='parameters for time constants distributions (shape of gamma/sd of normal/max of uniform)')
 # Training Setup
 parser.add_argument('--cuda', type=bool, default=True, help='use cuda?')
 parser.add_argument('--train_ab', type=int, default=0, help='train heterogeneous time constants')
@@ -195,10 +196,6 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
             train_acc_v = []
             test_acc_v = []
 
-    if start_epoch == nb_epochs:
-        learn_prms = [(p[0], p[1].detach().cpu().numpy()) for p in model.named_parameters()]
-        return learn_prms, train_loss_v, test_loss_v, train_acc_v, test_acc_v
-
     # Obtain data samples and labels
     print(os.getcwd())
     print(os.path.join(os.getcwd(), prms['train_path']))
@@ -208,6 +205,10 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
     if not prms['class_list']:
         prms['class_list'] = np.unique(labels_train).tolist()
     print("Class list:", prms['class_list'])
+
+    if start_epoch == nb_epochs:
+        learn_prms = [(p[0], p[1].detach().cpu().numpy()) for p in model.named_parameters()]
+        return learn_prms, train_loss_v, test_loss_v, train_acc_v, test_acc_v
 
     num_train_samples = len(np.where(np.isin(labels_train, prms['class_list']))[0])
     num_test_samples = len(np.where(np.isin(labels_test, prms['class_list']))[0])
