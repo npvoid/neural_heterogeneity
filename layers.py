@@ -11,7 +11,7 @@ spike_fn = SuSpike.apply
 def dist_fn(dist):
     return {
         'gamma': lambda mean, k, size: np.random.gamma(k, scale=mean/k, size=size),
-        'normal': lambda mean, sd, size: np.random.normal(loc=mean, scale=sd, size=size),
+        'normal': lambda mean, k, size: np.random.normal(loc=mean, scale=mean/np.sqrt(k), size=size), #change standard deviation to match gamma
         'uniform': lambda _, maximum, size: np.random.uniform(low=0, high=maximum, size=size),
     }[dist.lower()]
 
