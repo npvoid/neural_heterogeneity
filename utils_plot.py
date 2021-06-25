@@ -72,6 +72,7 @@ def plot_param_dist(path_results, dirName, prms, learn_prms):
         # Time constants distribution
         if pname == 'alpha' or pname == 'beta':
             tau = ab2tau(lparam.flatten(), prms['time_step']) / 1e-3
+            print(lparam_name, np.max(lparam), np.min(tau))
             ax = sns.distplot(tau, kde=False)
             plt.xlabel('ms')
             if pname == 'alpha':

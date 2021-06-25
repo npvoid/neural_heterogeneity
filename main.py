@@ -206,6 +206,9 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
         prms['class_list'] = np.unique(labels_train).tolist()
     print("Class list:", prms['class_list'])
 
+    if prms['clip']:
+        model.apply(clipper)        #Clip the taus before training starts
+
     if start_epoch == nb_epochs:
         learn_prms = [(p[0], p[1].detach().cpu().numpy()) for p in model.named_parameters()]
         return learn_prms, train_loss_v, test_loss_v, train_acc_v, test_acc_v
