@@ -92,6 +92,76 @@ def sparse_data_generator(units, times, labels, prms, shuffle=True, epoch=0, dro
 
         counter += 1
 
+def shd_augmented_sparse_data_generator(units, times, labels, prms, shuffle=True, epoch=0, drop_last=True):
+    seed = prms['seed']+epoch
+    set_seed(seed)
+    batch_size = prms['batch_size']
+    nb_steps = prms['nb_steps']
+    nb_units = prms['nb_inputs']
+    time_step = prms['time_step']
+    rate = prms['rate']
+    p_del = prms['p_del']
+    class_list = prms['class_list']
+    assert prms['nb_inputs']==70, "Number of input channels must be 70"
+
+    sample_index = np.where(np.isin(labels, class_list))[0]  # Indices to access the data_paths
+    num_samples = len(sample_index)  # Number of samples in data
+
+    if drop_last:
+        number_of_batches = num_samples // batch_size  # Number of total batches with given data size
+    else:
+        number_of_batches = -(-num_samples // batch_size)
+
+    if shuffle:
+        np.random.shuffle(sample_index)  # Shuffle the paths indices
+
+    counter = 0
+    while counter < number_of_batches:
+        batch_index = sample_index[batch_size * counter:min(num_samples, batch_size * (counter + 1))]
+        batch_size = len(batch_index)
+        coo = [[] for i in range(3)]
+        for bc, idx in enumerate(batch_index):
+            ts = (np.round(times[idx]*1./time_step).astype(np.int))
+            us = units[idx]
+
+            # Add jitter
+            jitter_noise = 20*np.random.randn(*us.shape)
+            jitter_noise = np.rint(jitter_noise).astype(np.int)
+            us = us + jitter_noise
+            us[us<0] = 700+us[us<0]
+            # Merge channels
+            us = us // 10
+
+            # Constrain spike length
+            idx = (ts < nb_steps)
+            ts = ts[idx]
+            us = us[idx]
+            # Add random spikes
+            ts_r, us_r = poisson_spikes_gen(nb_units, nb_steps, rate, time_step, seed)
+            ts = np.concatenate((ts, ts_r))
+            us = np.concatenate((us, us_r))
+            # Delete spikes at random with given prob.
+            idx = poisson_spikes_indices(ts.size, p_del, seed)
+            ts = ts[idx]
+            us = us[idx]
+
+            batch = [bc for _ in range(ts.size)]
+            coo[0].extend(batch)
+            coo[1].extend(ts.tolist())
+            coo[2].extend(us.tolist())
+
+        i = torch.LongTensor(coo)
+        v = torch.FloatTensor(np.ones(len(coo[0])))
+
+        X_batch = torch.sparse.FloatTensor(i, v, torch.Size([batch_size, nb_steps, nb_units])).to_dense()
+        y_batch = torch.tensor([class_list.index(a) for a in labels[batch_index].astype(np.int)], dtype=torch.long)
+
+        X_batch[X_batch[:] > 1.] = 1.
+
+        yield X_batch, y_batch
+
+        counter += 1
+
 
 def get_mini_batch(training_data_loader, device):
     for batch in training_data_loader:
