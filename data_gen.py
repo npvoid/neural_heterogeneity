@@ -127,8 +127,7 @@ def shd_augmented_sparse_data_generator(units, times, labels, prms, shuffle=True
             # Add jitter
             jitter_noise = 20*np.random.randn(*us.shape)
             jitter_noise = np.rint(jitter_noise).astype(np.int)
-            us = us + jitter_noise
-            us[us<0] = 700+us[us<0]
+            us = (us + jitter_noise) % 700
             # Merge channels
             us = us // 10
 
