@@ -1,3 +1,4 @@
+% Adapted from modelDB accesion number 190565 (Supervised learning in spiking neural networks with FORCE training (Nicola & Clopath 2017))
 classdef LIFFORCESONG_HDTS < handle
     properties
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -193,7 +193,7 @@ for N_index = 1:numel(Ns)
         lif_net.plot_train_test(lif_net, type)
     end
     [~, ~, zx_train_hom, zx_test_hom, zx_train_hat_hom, zx_test_hat_hom] = lif_net.get_output(lif_net);    
-    error_disp = mean(test_error_het(:,N_index), 1);
+    error_disp = mean(test_error_hom(:,N_index), 1);
     disp(['N=', num2str(N), ' Testing Error HDTS Homogeneous = ', num2str(error_disp)])
     if N==4000
         save('homogeneous_4000.mat', 'lif_net');

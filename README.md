@@ -11,9 +11,13 @@ For surrogate gradient descent based methods:
 * [dill](https://dill.readthedocs.io/en/latest/dill.html) 
 * [pytables](https://www.pytables.org/usersguide/installation.html) (for reading .h5 files for SHD and N-MNIST datasets)
 
-For FORCE trainig based methods:
+For FORCE training based methods:
 * [MATLAB](https://www.mathworks.com/products/matlab.html)
 
+For plotting experimentally observed time constant distributions:
+* [matplotlib](https://matplotlib.org/stable/users/installing.html) 
+* [scipy](https://www.scipy.org/) 
+* [allensdk](https://allensdk.readthedocs.io/en/latest/install.html)
 
 ## Running Surrogate based experiments:
 
@@ -22,7 +26,7 @@ In order to run an experiments you simply need to navigate to `SuGD_code` and ru
 ```
 python main.py
 ```
-This will run with the default parameters. You can expecify them, for instance to initialise the network with heterogeneous time constants following a uniform distribution and training the time constants:
+This will run with the default parameters, which were set for SHD dataset. You can specify them, for instance to initialise the network with heterogeneous time constants following a uniform distribution and training the time constants:
 
 ```
 python main.py --het_ab 1 --dist_prms uniform --train_ab 1
@@ -34,8 +38,11 @@ All datasets can be downloaded from the links provided below. Running the N-MNIS
 
 ## Running FORCE based experiments:
 
-Navigate to `FORCE_code`. This directory contains the script `LIFSONGBIRD_HET`. This script runs FORCE in the three regimes specified in the paper and then plots the results. You may want to comment the last section which runs the gridsearch as it takes very long.
+Navigate to `FORCE_code`. This directory contains the script `LIFSONGBIRD_HET.m`. This script runs FORCE in the three regimes specified in the paper and then plots the results. You may want to comment the last section which runs the gridsearch as it takes very long.
 
+## Plotting experimentally observed time constants (Allen and Manis datasets):
+
+Go to `Experiment_taudist_code`. Since it is problematic to access the time constants in the Paul Manis dataset, you can first run `manis_data.py` to extract and save them in a text file. You may then run `time_constant_distributions.py` to plot the distributions of Paul Manis dataset, as well as Allen Atlas dataset. The plots will also include their corresponding Gamma and Log-normal fits.
 
 ## Datasets:
 
