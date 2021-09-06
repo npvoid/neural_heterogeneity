@@ -1,5 +1,7 @@
 # Code for  Neural heterogeneity promotes robust learning
 
+[![DOI](https://zenodo.org/badge/328637490.svg)](https://zenodo.org/badge/latestdoi/328637490)
+
 ## Requirements
 
 For surrogate gradient descent based methods:
