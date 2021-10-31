@@ -2,6 +2,10 @@
 
 [![DOI](https://zenodo.org/badge/328637490.svg)](https://zenodo.org/badge/latestdoi/328637490)
 
+Perez-Nieves, N., Leung, V.C.H., Dragotti, P.L. et al. Neural heterogeneity promotes robust learning. 
+Nat Commun 12, 5791 (2021). https://doi.org/10.1038/s41467-021-26022-3
+
+
 ## Requirements
 
 For surrogate gradient descent based methods:
