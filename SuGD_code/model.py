@@ -87,6 +87,6 @@ class RSNN(nn.Module):
         else:
             self.network = nn.Sequential(*module_list)
 
-    def forward(self, x):
-        return self.network(x)
+    def forward(self, *args):
+        return self.network(args)
 

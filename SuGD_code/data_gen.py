@@ -59,7 +59,7 @@ def sparse_data_generator(units, times, labels, prms, shuffle=True, epoch=0, dro
         batch_size = len(batch_index)
         coo = [[] for i in range(3)]
         for bc, idx in enumerate(batch_index):
-            ts = (np.round(times[idx]*1./time_step).astype(np.int))
+            ts = (np.round(times[idx]*1./time_step).astype(np.int64))
             us = units[idx]
 
             # Constrain spike length
@@ -83,8 +83,8 @@ def sparse_data_generator(units, times, labels, prms, shuffle=True, epoch=0, dro
         i = torch.LongTensor(coo)
         v = torch.FloatTensor(np.ones(len(coo[0])))
 
-        X_batch = torch.sparse.FloatTensor(i, v, torch.Size([batch_size, nb_steps, nb_units])).to_dense()
-        y_batch = torch.tensor([class_list.index(a) for a in labels[batch_index].astype(np.int)], dtype=torch.long)
+        X_batch = torch.sparse_coo_tensor(i, v, torch.Size([batch_size, nb_steps, nb_units])).to_dense()
+        y_batch = torch.tensor([class_list.index(a) for a in labels[batch_index].astype(np.int64)], dtype=torch.long)
 
         X_batch[X_batch[:] > 1.] = 1.
 

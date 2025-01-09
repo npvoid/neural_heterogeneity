@@ -16,6 +16,7 @@ For surrogate gradient descent based methods:
 * [tqdm](https://tqdm.github.io/) 
 * [dill](https://dill.readthedocs.io/en/latest/dill.html) 
 * [pytables](https://www.pytables.org/usersguide/installation.html) (for reading .h5 files for SHD and N-MNIST datasets)
+* [torchinfo](https://github.com/TylerYep/torchinfo) (for summary of the PyTorch Model)
 
 For FORCE training based methods:
 * [MATLAB](https://www.mathworks.com/products/matlab.html)
@@ -38,7 +39,14 @@ This will run with the default parameters, which were set for SHD dataset. You c
 python main.py --het_ab 1 --dist_prms uniform --train_ab 1
 ```
 
-A comprehensive list of parameters and a description is provided within `main.py`.
+Note that the number of inputs have to be adjusted for each dataset as the table below. A comprehensive list of parameters and a description is provided within `main.py`.
+
+| ``dataset`` |        ``nb_inputs``        |
+|:------------|:---------------------------:|
+| SHD & SSC   |            $700$            |
+| F-MNIST     |            $784$            | 
+| N-MNIST     |  $2312=34\times34\times2$   | 
+| DVS128      | $32768=128\times128\times2$ | 
 
 All datasets can be downloaded from the links provided below. Running the N-MNIST and DVS dataset require an extra step to convert the data into .h5 format, This can be done by navegating to `SuGD_code/NMNIST` or `SuGD_code/DVS` and running `save_data_nmnist.py` or `save_data_dvs.py` respectively. You can specify the original dataset directory with `--data_dir` and where you want to save the converted dataset `--output_filename` arguments.
 

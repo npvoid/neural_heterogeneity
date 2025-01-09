@@ -13,7 +13,7 @@ from tqdm import tqdm
 import argparse
 import sys
 import numpy as np
-from model_summary import summary
+from torchinfo import summary
 from contextlib import redirect_stdout
 
 # ------------------------------------------------ Parameters ---------------------------------------------------- #
@@ -116,7 +116,7 @@ def compute_classification_accuracy(units, times, labels, prms, model):
     with torch.no_grad():
         for batch in sparse_data_generator(units, times, labels, prms, shuffle=False, drop_last=False):
             x_local, y_local = batch[0].to(device), batch[1].to(device)
-            layer_recs = model((0, 0, x_local))
+            layer_recs = model(0, 0, x_local)
             out = layer_recs[-1]
             m, _ = torch.max(out[1], 1)  # max over time
             _, am = torch.max(m, 1)  # argmax over output units
@@ -148,7 +148,7 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=[lambda_w, lambda_ab])
 
     with redirect_stdout(sys.stderr):
-        summary(model, (prms['nb_steps'], prms['nb_inputs']))
+        summary(model, [[prms['nb_steps'], prms['nb_inputs']]]*3, batch_dim=0, col_names=("input_size","output_size", "num_params"), mode='eval')
 
     # ============================= For Parallel Multiple GPU Processing =====================================
     # if torch.cuda.device_count() > 1:
@@ -252,7 +252,7 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
             #     break
             x_local, y_local = batch[0].to(device), batch[1].to(device)
             # Forward Pass
-            layer_recs = model((0, 0, x_local))
+            layer_recs = model(0, 0, x_local)
             out = layer_recs[-1]
             m, _ = torch.max(out[1], 1)
             _, am = torch.max(m, 1)  # argmax over output units
@@ -314,7 +314,7 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
             for b, batch in enumerate(testing_data_loader):
                 x_local, y_local = batch[0].to(device), batch[1].to(device)
                 # Forward Pass
-                layer_recs = model((0, 0, x_local))
+                layer_recs = model(0, 0, x_local)
                 out = layer_recs[-1]
                 m, _ = torch.max(out[1], 1)
                 _, am = torch.max(m, 1)  # argmax over output units
@@ -373,7 +373,7 @@ def train_experiment(prms, dir_save, dirName, test_net=False):
 
     if test_net:
         x_batch, y_batch = get_mini_batch(training_data_loader, device)
-        layer_recs = model((0, 0, x_batch))
+        layer_recs = model(0, 0, x_batch)
         plot_input(x_batch, y_batch)
         plot_layers(layer_recs)
         train_acc_v.append(0.)
